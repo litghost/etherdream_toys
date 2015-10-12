@@ -190,12 +190,12 @@ class DAC(object):
             except:
                 pass
 
-        self.prepare().dump()
+        self.prepare()
 
         take = lambda itr, n: itertools.islice(itr, n)
 
-        self.write(take(itr, capacity)).dump()
-        self.begin(0, pps).dump()
+        self.write(take(itr, capacity))
+        self.begin(0, pps)
 
         while True:
             status = self.ping()

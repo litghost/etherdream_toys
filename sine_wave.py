@@ -24,11 +24,22 @@ def playshow(scale, pps, freq, amp, phase_v, step):
     def fun(x, t):
         return round(amp*float(COORD_RANGE)/2*math.sin(freq*2*math.pi*float(x)/COORD_RANGE+2*math.pi*phase_v*t))
 
+
     def stream_points():
+        last_dwell = 0
         t = 0
         while True:
             for x in xrange(COORD_MIN, COORD_MAX, step):
-                yield (x, fun(x, t), 0, 0, COORD_MAX)
+                p = (x, fun(x, t), 0, 0, COORD_MAX)
+                
+                dwell_count = 1
+                last_dwell += 1
+                if last_dwell > 100:
+                    dwell_count = 100
+                    last_dwell = 0
+
+                for _ in xrange(dwell_count):
+                    yield p
 
             t += 1
 
