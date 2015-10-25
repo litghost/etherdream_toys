@@ -18,6 +18,7 @@ import socket
 import time
 import struct
 import itertools
+import sys
 
 def pack_point(x, y, r, g, b, i = -1, u1 = 0, u2 = 0, flags = 0):
     """Pack some color values into a struct dac_point.
@@ -119,8 +120,8 @@ class DAC(object):
                 % (cmd, cmdR))
 
         if response != "a":
-            raise ProtocolError("expected ACK, got %r"
-                % (response, ))
+            raise ProtocolError("expected ACK for cmd %r, got %r"
+                % (cmd, response, ))
 
         self.last_status = status
         return status
@@ -200,7 +201,13 @@ class DAC(object):
         while True:
             status = self.ping()
             points_to_write = capacity - status.fullness
-            self.write(take(itr, points_to_write))
+            try:
+                self.write(take(itr, points_to_write))
+            except ProtocolError:
+                print 'Underflow?'
+                self.prepare()
+                self.write(take(itr, capacity))
+                self.begin(0, pps)
 
     def play_stream(self, stream):
         # First, prepare the stream
