@@ -73,6 +73,9 @@ class SpirographToy(liblo.Server):
 
             x_rot = x*cos(t*self.rot_freq)-y*sin(t*self.rot_freq)
             y_rot = x*sin(t*self.rot_freq)+y*cos(t*self.rot_freq)
+
+            x_rot = min(COORD_MAX, max(COORD_MIN, x_rot))
+            y_rot = min(COORD_MAX, max(COORD_MIN, y_rot))
         
             return x_rot, y_rot
 
