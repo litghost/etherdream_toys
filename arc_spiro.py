@@ -30,7 +30,7 @@ class SerialOsc(liblo.Server):
 
         if args[0] == MK:
             liblo.send(device, '/sys/prefix', 'mk')
-            liblo.send(device, '/mk/grid/led/all', 0, 15)
+            liblo.send(device, '/mk/grid/led/all', 0)
         elif args[0] == ARC:
             liblo.send(device, '/sys/prefix', 'arc')
             liblo.send(device, '/arc/ring/map', 0, *(xrange(64)))

@@ -4,7 +4,7 @@ from ILDA import readFrames, readFirstFrame
 import liblo
 from liblo import make_method
 import argparse
-from math import cos, sin
+from math import cos, sin, pi
 
 
 COORD_MAX = 32767
@@ -26,6 +26,8 @@ class SpirographToy(liblo.Server):
         self.l = l
         self.k = k
         self.R = COORD_MAX
+
+        self.phase = [0, 0, 0]
 
     @make_method('/spiro/freq', 'f')
     def set_freq(self, path, args):
@@ -67,12 +69,14 @@ class SpirographToy(liblo.Server):
 
 
         def fun(t):
-            t_s = t*self.freq # scaled
-            x = self.R*((1-self.k)*cos(t_s)+self.l*self.k*cos((1-self.k)/self.k*t_s))
-            y = self.R*((1-self.k)*sin(t_s)-self.l*self.k*sin((1-self.k)/self.k*t_s))
+            self.phase[0] = (self.phase[0] + self.freq)
+            self.phase[1] = (self.phase[1] + (1-self.k)/self.k*self.freq) 
+            self.phase[2] = (self.phase[2] + self.rot_freq)
+            x = self.R*((1-self.k)*cos(self.phase[0])+self.l*self.k*cos(self.phase[1]))
+            y = self.R*((1-self.k)*sin(self.phase[0])-self.l*self.k*sin(self.phase[1]))
 
-            x_rot = x*cos(t*self.rot_freq)-y*sin(t*self.rot_freq)
-            y_rot = x*sin(t*self.rot_freq)+y*cos(t*self.rot_freq)
+            x_rot = x*cos(self.phase[2])-y*sin(self.phase[2])
+            y_rot = x*sin(self.phase[2])+y*cos(self.phase[2])
 
             x_rot = min(COORD_MAX, max(COORD_MIN, x_rot))
             y_rot = min(COORD_MAX, max(COORD_MIN, y_rot))
@@ -80,15 +84,16 @@ class SpirographToy(liblo.Server):
             return x_rot, y_rot
 
         def stream_points():
-            last_dwell = 0
-            t = 0.
+            t = 0
+
             while True:
                 x, y = fun(t)
                 p = (x, y, 0, 0, COORD_MAX)
                 yield p
-                t += 1
 
                 self.recv(0)
+                
+                t += 1
 
         itr = iter(stream_points())
 
