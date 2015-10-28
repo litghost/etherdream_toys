@@ -3,6 +3,7 @@ from liblo import make_method
 import socket
 import time
 import math
+from math import pi
 
 target = liblo.Address(12002)
 
@@ -41,13 +42,17 @@ class SerialOsc(liblo.Server):
 
     def update_setting(self, setting, perc):
         if setting == 0:
-            liblo.send(self.spiro, '/spiro/l', perc)
+            v = -.1*(perc-.5)
+            print v
+            liblo.send(self.spiro, '/beam/freq', v)
         elif setting == 1:
-            liblo.send(self.spiro, '/spiro/k', perc)
+            liblo.send(self.spiro, '/beam/rot', -2*pi*(perc-.5))
         elif setting == 2:
-            liblo.send(self.spiro, '/spiro/R', 32767*4*perc)
+            v = -.2*(perc-.5)
+            print v
+            liblo.send(self.spiro, '/beam/freq2', v)
         elif setting == 3:
-            liblo.send(self.spiro, '/spiro/rot_freq', -.001*(perc-.5))
+            liblo.send(self.spiro, '/beam/offset', -2*pi*(perc-.5))
         else:
             pass
     
